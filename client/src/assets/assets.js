@@ -179,7 +179,7 @@ export const dummyCarData = [
         "pricePerDay": 3200,
         "location": "Bangalore",
         "description": "The Mahindra Thar is an iconic off-road SUV produced by Mahindra. The Thar is perfect for adventure trips and city drives in India.",
-        "isAvaliable": true,
+        "isAvaliable": false,
         "createdAt": "2025-04-16T08:34:39.592Z",
     },
     {
