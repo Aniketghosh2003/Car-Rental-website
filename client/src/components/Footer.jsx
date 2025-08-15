@@ -1,11 +1,27 @@
 import React from 'react'
 import { assets } from '../assets/assets';
+import { motion } from "motion/react";
 
 const Footer = () => {
   return (
-    <div className="px-6 md:px-16 lg:px-24 xl:px-32 mt-60 text-sm text-gray-500">
-      <div className="flex flex-wrap justify-between items-start gap-8 pb-6 border-borderColor border-b">
-        <div className="max-w-80">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1, delay: 0.5 }}
+      className="px-6 md:px-16 lg:px-24 xl:px-32 mt-60 text-sm text-gray-500"
+    >
+      <motion.div 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="flex flex-wrap justify-between items-start gap-8 pb-6 border-borderColor border-b"
+      >
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="max-w-80"
+        >
           <img src={assets.logo} alt="logo" className="h-8 md:h-9" />
           <p className="max-w-80 mt-3">
             Premium car rental service with a wide selection of luxury and
@@ -37,9 +53,13 @@ const Footer = () => {
               <img src={assets.gmail_logo} alt="Gmail" className="w-5 h-5" />
             </a>
           </div>
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+        >
           <h2 className="text-base font-medium text-gray-800 uppercase">
             Quick Links
           </h2>
@@ -57,9 +77,13 @@ const Footer = () => {
               <a href="#">About Us</a>
             </li>
           </ul>
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+        >
           <h2 className="text-base font-medium text-gray-800 uppercase">
             Resources
           </h2>
@@ -77,9 +101,13 @@ const Footer = () => {
               <a href="#">Insurance</a>
             </li>
           </ul>
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+        >
           <h2 className="text-base font-medium text-gray-800 uppercase">
             Contact
           </h2>
@@ -105,10 +133,15 @@ const Footer = () => {
               <span className="block">🕒 Mon - Sun: 7:00 AM - 10:00 PM</span>
             </li>
           </ul>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <div className="flex flex-col md:flex-row gap-2 items-center justify-between py-5">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="flex flex-col md:flex-row gap-2 items-center justify-between py-5"
+      >
         <p>
           © {new Date().getFullYear()}{" "}
           <span className="font-medium">CarRental India</span>. All rights
@@ -127,8 +160,8 @@ const Footer = () => {
             <a href="#">Cookies</a>
           </li>
         </ul>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

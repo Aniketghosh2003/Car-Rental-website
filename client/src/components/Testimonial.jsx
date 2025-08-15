@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import Title from "./Title";
 import { assets } from "../assets/assets";
+import { motion } from "motion/react";
 
 const Testimonial = () => {
     const [tooltip, setTooltip] = useState({ visible: false, text: "", x: 0, y: 0 });
@@ -47,20 +48,44 @@ const Testimonial = () => {
       },
     ];
   return (
-    <div className="py-28 px-6 md:px-16 lg:px-24 xl:px-44">
-      <Title
-        title="What Our Customers Say"
-        subTitle="Discover why travelers across India choose our car rental service for their reliable and comfortable journeys."
-      />
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1, delay: 0.5 }}
+      className="py-28 px-6 md:px-16 lg:px-24 xl:px-44"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+      >
+        <Title
+          title="What Our Customers Say"
+          subTitle="Discover why travelers across India choose our car rental service for their reliable and comfortable journeys."
+        />
+      </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-18">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-18"
+      >
         {testimonials.map((testimonial, index) => (
-          <div
+          <motion.div
             key={index}
             ref={(el) => (cardRefs.current[index] = el)}
             onMouseMove={(e) => handleMouseMove(e, index)}
             onMouseLeave={handleMouseLeave}
-            className="relative border border-gray-200 rounded-lg overflow-hidden max-w-sm shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 ease-in-out cursor-pointer bg-white"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.6, 
+              delay: index * 0.1,
+              ease: "easeOut" 
+            }}
+            whileHover={{ y: -8, scale: 1.02 }}
+            className="relative border border-gray-200 rounded-lg overflow-hidden max-w-sm shadow-md hover:shadow-xl transition-all duration-300 ease-in-out cursor-pointer bg-white"
           >
             {tooltip.visible && tooltip.text === testimonial.name && (
               <span
@@ -119,10 +144,10 @@ const Testimonial = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
