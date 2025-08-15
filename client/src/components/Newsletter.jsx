@@ -1,14 +1,37 @@
 import React from 'react'
+import { motion } from "motion/react";
 
 const Newsletter = () => {
   return (
-    <div className="flex flex-col items-center justify-center text-center space-y-2">
-      <h1 className="md:text-4xl text-2xl font-semibold">Never Miss a Deal!</h1>
-      <p className="md:text-lg text-gray-500/70 pb-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1, delay: 0.5 }}
+      className="flex flex-col items-center justify-center text-center space-y-2"
+    >
+      <motion.h1 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="md:text-4xl text-2xl font-semibold"
+      >
+        Never Miss a Deal!
+      </motion.h1>
+      <motion.p 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+        className="md:text-lg text-gray-500/70 pb-8"
+      >
         Subscribe to get the latest offers, new arrivals, and exclusive
         discounts
-      </p>
-      <form className="flex items-center justify-between max-w-2xl w-full md:h-13 h-12">
+      </motion.p>
+      <motion.form 
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="flex items-center justify-between max-w-2xl w-full md:h-13 h-12"
+      >
         <input
           className="border border-gray-300 rounded-md h-full border-r-0 outline-none w-full rounded-r-none px-3 text-gray-500"
           type="text"
@@ -21,8 +44,8 @@ const Newsletter = () => {
         >
           Subscribe
         </button>
-      </form>
-    </div>
+      </motion.form>
+    </motion.div>
   );
 }
 

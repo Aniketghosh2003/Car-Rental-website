@@ -1,15 +1,32 @@
 import React from "react";
 import { assets, dummyUserData, ownerMenuLinks } from "../../assets/assets";
 import { NavLink, useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useAppContext } from "../../context/appContext";
+import { useState } from "react";
 
 const Sidebar = () => {
-  const user = dummyUserData;
+  const { user, axios, fetchUser } = useAppContext();
   const location = useLocation();
-  const [image, setImage] = React.useState(null);
+  const [image, setImage] = useState("");
 
   const updateImage = async () => {
-    user.image = image;
-    setImage(null);
+    try {
+      const formData = new FormData();
+      formData.append("image", image);
+
+      const { data } = await axios.post("/api/owner/update-image", formData);
+
+      if (data.success) {
+        fetchUser();
+        toast.success("Image updated successfully!");
+        setImage("");
+      }else{
+        toast.error(data.message || "Failed to update image");
+      }
+    } catch (error) {
+      toast.error(error.message || "Something went wrong");
+    }
   };
 
   return (

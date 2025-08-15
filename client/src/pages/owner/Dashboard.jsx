@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { assets, dummyDashboardData } from "../../assets/assets";
 import Title from "../../components/owner/Title";
+import { useAppContext } from "../../context/appContext";
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
+
+  const {axios, isOwner, currency} = useAppContext();
+
+
   const [data, setData] = useState({
     totalCars: 0,
     totalBookings: 0,
@@ -48,9 +54,25 @@ const Dashboard = () => {
     }
   };
 
+  const fetchDashboardData = async () => {
+    try {
+      const { data } = await axios.get("/api/owner/dashboard");
+      if (data.success) {
+        setData(data.dashboardData);
+      } else {
+        toast.error(data.message || "Failed to fetch dashboard data");
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      toast.error(error.response?.data?.message || error.message || "Failed to fetch dashboard data");
+    }
+  };
+
   useEffect(() => {
-    setData(dummyDashboardData);
-  }, []);
+    if (isOwner) {
+      fetchDashboardData();
+    }
+  }, [isOwner]);
 
   return (
     <div className="p-6 md:p-8 lg:p-10 text-gray-800">

@@ -1,16 +1,56 @@
 import React from 'react'
+import { useAppContext } from '../context/appContext';
+import toast from 'react-hot-toast';
 
-const Login = ({ setShowLogin }) => {
+const Login = () => {
+
+    const { setShowLogin, axios, setToken , navigate} = useAppContext();
+
     const [state, setState] = React.useState("login");
     const [name, setName] = React.useState("");
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
 
-    const onSubmitHandler = (e) => {
-        e.preventDefault();
-        console.log("Form submitted:", { state, name, email, password });
-    };
+const onSubmitHandler = async (event) => {
+  try {
+    event.preventDefault();
+    
+    // Validation for register
+    if (state === "register" && (!name || !email || !password)) {
+      toast.error("Please fill all fields");
+      return;
+    }
+    
+    // Validation for login
+    if (state === "login" && (!email || !password)) {
+      toast.error("Please fill all fields");
+      return;
+    }
 
+    const requestData = state === "register" 
+      ? { name, email, password }
+      : { email, password };
+
+    const { data } = await axios.post(`/api/user/${state}`, requestData);
+
+    if (data.success) {
+      toast.success(data.message || "Success!");
+      navigate("/");
+      setToken(data.token);
+      localStorage.setItem("token", data.token);
+      setShowLogin(false);
+    } else {
+      toast.error(data.message);
+    }
+  } catch (error) {
+    console.error("Login/Register error:", error);
+    if (error.response?.data?.message) {
+      toast.error(error.response.data.message);
+    } else {
+      toast.error(error.message || "Something went wrong");
+    }
+  }
+};
     return (
         <div
             onClick={() => setShowLogin(false)}

@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import Title from "../../components/owner/Title";
 import { assets } from "../../assets/assets";
+import { useAppContext } from "../../context/appContext";
+import toast from "react-hot-toast";
 
 const AddCar = () => {
+
+  const {axios, currency} = useAppContext();
+
   const [image, setImage] = useState(null);
   const [car, setCar] = useState({
     brand: "",
@@ -31,10 +36,43 @@ const AddCar = () => {
     }
   };
 
-  const onSubmitHandler = (e) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const onSubmitHandler = async(e) => {
     e.preventDefault();
-    console.log("Submitting Car Data:", car);
-    console.log("Submitting Image:", image);
+    if(isLoading) {
+       return null;
+    }
+    
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", image);
+      formData.append("carData", JSON.stringify(car));
+
+      const {data} = await axios.post("/api/owner/add-car", formData);
+      if(data.success) {
+        toast.success("Car added successfully!");
+        setImage(null);
+        setCar({
+          brand: "",
+          model: "",
+          year: new Date().getFullYear(),
+          pricePerDay: "",
+          category: "",
+          transmission: "",
+          fuel_type: "",
+          seating_capacity: "",
+          location: "",
+          description: "",
+        });
+      } else {
+        toast.error(data.message || "Failed to add car.");
+      }
+    } catch (error) {
+      toast.error("Failed to add car.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -157,31 +195,41 @@ const AddCar = () => {
               <label htmlFor="transmission" className="block text-sm font-medium text-gray-700 mb-2">
                 Transmission
               </label>
-              <input
-                type="text"
+              <select
                 name="transmission"
                 id="transmission"
                 value={car.transmission}
                 onChange={onChangeHandler}
-                placeholder="Automatic"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 required
-              />
+              >
+                <option value="" disabled>Select transmission type</option>
+                <option value="Manual">Manual</option>
+                <option value="Automatic">Automatic</option>
+                <option value="CVT">CVT (Continuously Variable)</option>
+                <option value="Semi-Automatic">Semi-Automatic</option>
+              </select>
             </div>
             <div>
               <label htmlFor="fuel_type" className="block text-sm font-medium text-gray-700 mb-2">
                 Fuel Type
               </label>
-              <input
-                type="text"
+              <select
                 name="fuel_type"
                 id="fuel_type"
                 value={car.fuel_type}
                 onChange={onChangeHandler}
-                placeholder="Diesel"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 required
-              />
+              >
+                <option value="" disabled>Select fuel type</option>
+                <option value="Petrol">Petrol</option>
+                <option value="Diesel">Diesel</option>
+                <option value="CNG">CNG (Compressed Natural Gas)</option>
+                <option value="Electric">Electric</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="LPG">LPG (Liquefied Petroleum Gas)</option>
+              </select>
             </div>
             <div>
               <label htmlFor="seating_capacity" className="block text-sm font-medium text-gray-700 mb-2">
@@ -242,7 +290,7 @@ const AddCar = () => {
                 alt="Add" 
                 className="w-5 h-5"
               />
-              List Your Car
+              {isLoading ? "Adding..." : "List Your Car"}
             </button>
           </div>
         </form>
