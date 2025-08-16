@@ -59,6 +59,7 @@ export const AppProvider = ({ children }) => {
     setUser(null);
     setIsOwner(false);
     axios.defaults.headers.common["Authorization"] = '';
+    navigate("/"); // Redirect to home page
     toast.success("Logged out successfully");
   }
 

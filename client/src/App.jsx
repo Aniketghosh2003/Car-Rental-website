@@ -5,6 +5,9 @@ import Home from "./pages/Home.jsx"
 import Cars from './pages/Cars.jsx';
 import CarDetails from './pages/CarDetails.jsx';
 import MyBookings from './pages/MyBookings.jsx';
+import TermsOfService from './pages/TermsOfService.jsx';
+import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
+import HelpCenter from './pages/HelpCenter.jsx';
 import Footer from './components/Footer.jsx';
 import Layout from './pages/owner/Layout.jsx';
 import Dashboard from './pages/owner/Dashboard.jsx';
@@ -31,6 +34,9 @@ const App = () => {
         <Route path="/car-details/:id" element={<CarDetails />} />
         <Route path="/cars" element={<Cars />} />
         <Route path="/my-bookings" element={<MyBookings />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/help-center" element={<HelpCenter />} />
         <Route path="/owner" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="add-car" element={<AddCar />} />
