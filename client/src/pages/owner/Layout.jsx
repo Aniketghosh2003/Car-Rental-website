@@ -2,7 +2,7 @@ import React from 'react'
 import NavbarOwner from '../../components/owner/NavbarOwner'
 import { Outlet } from 'react-router-dom'
 import Sidebar from '../../components/owner/Sidebar'
-import { useAppContext } from '../../context/appContext'
+import { useAppContext } from '../../context/AppContext'
 import { useEffect } from 'react'
 
 const Layout = () => {
