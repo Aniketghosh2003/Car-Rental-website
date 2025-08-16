@@ -12,7 +12,6 @@ const Home = () => {
       <FeaturedSection/>
       <Banner/> 
       <Testimonial/>
-      <Newsletter/>
     </div>
   )
 }
