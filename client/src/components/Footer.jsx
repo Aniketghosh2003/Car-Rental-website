@@ -1,6 +1,7 @@
 import React from 'react'
 import { assets } from '../assets/assets';
 import { motion } from "motion/react";
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -28,30 +29,30 @@ const Footer = () => {
             everyday vehicles for all your driving needs.
           </p>
           <div className="flex items-center gap-3 mt-6">
-            <a href="">
+            <span>
               <img
                 src={assets.instagram_logo}
                 alt="Instagram"
                 className="w-5 h-5"
               />
-            </a>
-            <a href="">
+            </span>
+            <span>
               <img
                 src={assets.facebook_logo}
                 alt="Facebook"
                 className="w-5 h-5"
               />
-            </a>
-            <a href="">
+            </span>
+            <span>
               <img
                 src={assets.twitter_logo}
                 alt="Twitter"
                 className="w-5 h-5"
               />
-            </a>
-            <a href="">
+            </span>
+            <span>
               <img src={assets.gmail_logo} alt="Gmail" className="w-5 h-5" />
-            </a>
+            </span>
           </div>
         </motion.div>
 
@@ -65,16 +66,16 @@ const Footer = () => {
           </h2>
           <ul className="mt-3 flex flex-col gap-1.5">
             <li>
-              <a href="#">Home</a>
+              <Link to="/" className="hover:text-gray-700 transition-colors">Home</Link>
             </li>
             <li>
-              <a href="#">Browse Cars</a>
+              <Link to="/cars" className="hover:text-gray-700 transition-colors">Browse Cars</Link>
             </li>
             <li>
-              <a href="#">List Your Car</a>
+              <Link to="/my-bookings" className="hover:text-gray-700 transition-colors">My Bookings</Link>
             </li>
             <li>
-              <a href="#">About Us</a>
+              <Link to="#" className="hover:text-gray-700 transition-colors">About Us</Link>
             </li>
           </ul>
         </motion.div>
@@ -89,16 +90,23 @@ const Footer = () => {
           </h2>
           <ul className="mt-3 flex flex-col gap-1.5">
             <li>
-              <a href="#">Help Center</a>
+              <Link to="/help-center" className="hover:text-gray-700 transition-colors">Help Center</Link>
             </li>
             <li>
-              <a href="#">Terms of Service</a>
+              <Link to="/terms-of-service" className="hover:text-gray-700 transition-colors">Terms of Service</Link>
             </li>
             <li>
-              <a href="#">Privacy Policy</a>
+              <Link to="/privacy-policy" className="hover:text-gray-700 transition-colors">Privacy Policy</Link>
             </li>
             <li>
-              <a href="#">Insurance</a>
+              <a 
+                href="https://www.icicilombard.com/motor-insurance" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-gray-700 transition-colors"
+              >
+                Car Insurance
+              </a>
             </li>
           </ul>
         </motion.div>
@@ -117,7 +125,7 @@ const Footer = () => {
               <span className="block ml-4">New Delhi - 110001</span>
             </li>
             <li>
-              <a href="tel:+919876543210" className="hover:text-gray-700">
+              <a href="tel:+910000000000" className="hover:text-gray-700">
                 📞 +91 00000 00000
               </a>
             </li>
@@ -149,15 +157,15 @@ const Footer = () => {
         </p>
         <ul className="flex items-center gap-4">
           <li>
-            <a href="#">Privacy</a>
+            <span>Privacy</span>
             <span> | </span>
           </li>
           <li>
-            <a href="#">Terms</a>
+            <span>Terms</span>
             <span> | </span>
           </li>
           <li>
-            <a href="#">Cookies</a>
+            <span>Cookies</span>
           </li>
         </ul>
       </motion.div>

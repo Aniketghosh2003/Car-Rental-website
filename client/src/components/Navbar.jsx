@@ -3,6 +3,7 @@ import { assets, menuLinks } from "../assets/assets.js";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/appContext.jsx";
 import {motion} from "motion/react";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
 
@@ -22,7 +23,7 @@ const Navbar = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || "Failed to change role");
     }
   };
 
