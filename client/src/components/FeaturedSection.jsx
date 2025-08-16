@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Title from "./Title";
 import CarCard from "./CarCard";
-import { useAppContext } from "../context/appContext";
+import { useAppContext } from "../context/AppContext";
 import { motion } from "framer-motion"; // Corrected import
 import { assets } from "../assets/assets";
 

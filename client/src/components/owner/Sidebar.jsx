@@ -2,7 +2,7 @@ import React from "react";
 import { assets, dummyUserData, ownerMenuLinks } from "../../assets/assets";
 import { NavLink, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useAppContext } from "../../context/appContext";
+import { useAppContext } from "../../context/AppContext";
 import { useState } from "react";
 
 const Sidebar = () => {
