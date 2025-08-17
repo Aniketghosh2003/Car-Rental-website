@@ -1,12 +1,10 @@
-import { useContext } from "react";
-import { createContext } from "react";
+import { useContext, createContext, useState, useEffect } from "react";
 import axios from "axios";
-import {toast} from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { useEffect } from "react";
 
-axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
+// Set base URL
+axios.defaults.baseURL = import.meta.env.VITE_BASE_URL || "";
 
 export const AppContext = createContext();
 
@@ -20,10 +18,9 @@ export const AppProvider = ({ children }) => {
   const [showLogin, setShowLogin] = useState(false);
   const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
-
   const [cars, setCars] = useState([]);
 
-  // Function to check if user is logged in
+  // Fetch user data
   const fetchUser = async () => {
     try {
       const { data } = await axios.get("/api/user/data");
@@ -38,39 +35,49 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  //fetch all cars from the server
+  // Fetch cars
   const fetchCars = async () => {
     try {
+      console.log("Fetching cars...");
       const { data } = await axios.get("/api/user/cars");
+      console.log("Response:", data);
+      
       if (data.success) {
         setCars(data.cars);
+        console.log("Cars loaded:", data.cars.length);
+        return data.cars;
       } else {
         toast.error(data.message);
+        return [];
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error("Error fetching cars:", error);
+      toast.error("Failed to load cars. Please try again.");
+      return [];
     }
   };
 
-  //logout function 
-  const logout = () =>{
+  // Logout
+  const logout = () => {
     localStorage.removeItem("token");
     setToken(null);
     setUser(null);
     setIsOwner(false);
     axios.defaults.headers.common["Authorization"] = '';
-    navigate("/"); // Redirect to home page
+    navigate("/");
     toast.success("Logged out successfully");
-  }
+  };
 
-  //to retrieve token from local storage
+  // Initialize
   useEffect(() => {
     const token = localStorage.getItem("token");
     setToken(token);
-    fetchCars()
+    
+    // Fetch cars on app load
+    fetchCars();
   }, []);
 
-  //useEffect to set axios headers
+  // Set auth headers
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common["Authorization"] = `${token}`;
@@ -101,11 +108,7 @@ export const AppProvider = ({ children }) => {
     setReturnDate,
   };
 
-  return (
-    <AppContext.Provider value={value}>
-      {children}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
 export const useAppContext = () => {
