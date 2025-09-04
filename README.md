@@ -8,7 +8,7 @@ A modern, full-stack car rental platform built with the MERN stack, offering sea
 
 ## 📋 Table of Contents
 
-- [Overview](##overview)
+- [Overview](#Overview)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
