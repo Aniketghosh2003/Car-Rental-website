@@ -6,6 +6,18 @@ A modern, full-stack car rental platform built with the MERN stack, offering sea
 
 **[View Live Application](https://car-rental-website1-omega.vercel.app/)**
 
+## 📝 Project Diagrams
+
+### Application Flowchart
+
+![Car Rental Website Flowchart](./flowchart.svg)
+
+---
+
+### Database Schema
+
+![Database Diagram](./Database_Diagarm.drawio.svg)
+
 ## 📋 Table of Contents
 
 - [Overview](#Overview)
