@@ -51,12 +51,6 @@ The application addresses the growing demand for digital car rental services by 
 - Email notifications for booking status updates
 - Booking history and status tracking
 
-### 💳 Payment Integration
-- Secure payment gateway integration
-- Multiple payment method support
-- Transaction history and receipts
-- Automated billing calculations
-
 ### 📱 Responsive Design
 - Mobile-first design approach
 - Cross-browser compatibility
@@ -189,32 +183,32 @@ REACT_APP_API_URL=http://localhost:5000/api
 
 ## 📊 API Documentation
 
-### Authentication Endpoints
+### User Endpoints
 ```
-POST /api/auth/register    # User registration
-POST /api/auth/login       # User login
-POST /api/auth/logout      # User logout
-GET  /api/auth/profile     # Get user profile
-PUT  /api/auth/profile     # Update user profile
+POST /api/user/register    # User registration
+POST /api/user/login       # User login
+GET  /api/user/data        # Get user data (protected route)
+GET  /api/user/cars        # Get all avaliable cars
 ```
 
-### Vehicle Endpoints
-```
-GET    /api/vehicles           # Get all vehicles
-GET    /api/vehicles/:id       # Get vehicle by ID
-POST   /api/vehicles           # Create new vehicle (Admin)
-PUT    /api/vehicles/:id       # Update vehicle (Admin)
-DELETE /api/vehicles/:id       # Delete vehicle (Admin)
-GET    /api/vehicles/search    # Search vehicles with filters
+### Owner Endpoints
+``` 
+POST   /api/owner/change-role          # change role user to owner  (protected route)
+POST   /api/owner/add-car              # owner can list or add their cars for rent (protected route)
+GET    /api/owner/cars                 # Get all the cars that is listed by owner  (protected route)
+POST   /api/owner/toogle-cars          # Toogle the avaliability of the car   (protected route)
+POST   /api/owner/delete-cars          # Delete car from owner listing   (protected route)
+GET    /api/owner/dashboard            # Get dashboard data of owner  (protected route)
+POST   /api/owner/update-image         # update the profile image of owner  (protected route)
 ```
 
 ### Booking Endpoints
 ```
-GET    /api/bookings           # Get user bookings
-POST   /api/bookings           # Create new booking
-GET    /api/bookings/:id       # Get booking details
-PUT    /api/bookings/:id       # Update booking status
-DELETE /api/bookings/:id       # Cancel booking
+POST    /api/bookings/check-availability       # Gives all available cars
+POST    /api/bookings/create                   # Create new booking (protected route)
+GET     /api/bookings/user                     # Get booking details for user (protected route)
+GET     /api/bookings/owner                    # Get booking details of users for owner (protected route)
+POST    /api/bookings/change                   # update the bookings status for car (cancel or confirm) (protected route)
 ```
 
 ## 📈 Performance
