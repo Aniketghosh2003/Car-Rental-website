@@ -75,8 +75,16 @@ const Footer = () => {
               <Link to="/my-bookings" className="hover:text-gray-700 transition-colors">My Bookings</Link>
             </li>
             <li>
-              <Link to="#" className="hover:text-gray-700 transition-colors">About Us</Link>
-            </li>
+                <a 
+                  href="https://aniketghosh-portfolio.vercel.app/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-gray-700 transition-colors"
+                  >
+                About Us
+             </a>
+          </li>
+
           </ul>
         </motion.div>
 
