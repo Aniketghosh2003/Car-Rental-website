@@ -38,13 +38,13 @@ export const AppProvider = ({ children }) => {
   // Fetch cars
   const fetchCars = async () => {
     try {
-      console.log("Fetching cars...");
+      //console.log("Fetching cars...");
       const { data } = await axios.get("/api/user/cars");
-      console.log("Response:", data);
+      //console.log("Response:", data);
       
       if (data.success) {
         setCars(data.cars);
-        console.log("Cars loaded:", data.cars.length);
+        //console.log("Cars loaded:", data.cars.length);
         return data.cars;
       } else {
         toast.error(data.message);
