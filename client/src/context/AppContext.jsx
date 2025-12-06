@@ -4,7 +4,8 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 // Set base URL
-axios.defaults.baseURL = import.meta.env.VITE_BASE_URL || "";
+axios.defaults.baseURL =
+  import.meta.env.VITE_BASE_URL || "http://localhost:3000";
 
 export const AppContext = createContext();
 
@@ -43,16 +44,20 @@ export const AppProvider = ({ children }) => {
       //console.log("Response:", data);
       
       if (data.success) {
-        setCars(data.cars);
+        setCars(data.cars || []);
         //console.log("Cars loaded:", data.cars.length);
-        return data.cars;
+        return data.cars || [];
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Failed to load cars.");
         return [];
       }
     } catch (error) {
       console.error("Error fetching cars:", error);
-      toast.error("Failed to load cars. Please try again.");
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to load cars. Please try again."
+      );
       return [];
     }
   };
