@@ -2,6 +2,9 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Car from "../models/Car.js";
+import redisClient from "../config/redis.js";
+
+const DEFAULT_EXPIRATION = 3600;
 
 // JWT Token Generation Function
 const generateToken = (user) => {
@@ -142,7 +145,26 @@ export const getUserdata = async (req, res) => {
 //get all cars data
 export const getCars = async (req, res) => {
   try {
+    // 1. Check Redis for data
+    const cachedCars = await redisClient.get("available_cars");
+
+    if (cachedCars) {
+      //console.log("Cache Hit");
+      return res.json({ success: true, cars: JSON.parse(cachedCars) });
+    }
+
+    //console.log("Cache Miss");
+    // 2. If not in Redis, fetch from MongoDB
     const cars = await Car.find({ isAvaliable: true });
+
+    // 3. Save to Redis with Expiry (setEx)
+    // key, expiration time (seconds), value
+    await redisClient.setEx(
+      "available_cars",
+      DEFAULT_EXPIRATION,
+      JSON.stringify(cars)
+    );
+
     res.json({ success: true, cars });
   } catch (error) {
     console.log(error.message);

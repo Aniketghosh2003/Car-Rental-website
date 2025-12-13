@@ -3,8 +3,8 @@ import User from "../models/User.js";
 import fs from "fs";
 import Car from "../models/Car.js";
 import Booking from "../models/Booking.js";
+import redisClient from "../config/redis.js";
 
-//to change the role
 export const changeRoleToOwner = async (req, res) => {
   try {
     const { _id } = req.user;
@@ -16,14 +16,12 @@ export const changeRoleToOwner = async (req, res) => {
   }
 };
 
-//add the car to the database
 export const addCar = async (req, res) => {
   try {
     const { _id } = req.user;
     let car = JSON.parse(req.body.carData);
     const imageFile = req.file;
 
-    // upload the image
     const fileBuffer = fs.readFileSync(imageFile.path);
     const response = await imageKit.upload({
       file: fileBuffer,
@@ -31,7 +29,6 @@ export const addCar = async (req, res) => {
       folder: "/cars",
     });
 
-    //url generation for the image
     var optimizedImageUrl = imageKit.url({
       path: response.filePath,
       transformation: [
@@ -43,6 +40,8 @@ export const addCar = async (req, res) => {
 
     const image = optimizedImageUrl;
     await Car.create({ ...car, owner: _id, image });
+
+    await redisClient.del("available_cars");
 
     res.json({
       success: true,
@@ -57,7 +56,6 @@ export const addCar = async (req, res) => {
   }
 };
 
-//
 export const getOwnerCars = async (req, res) => {
   try {
     const { _id } = req.user;
@@ -75,7 +73,6 @@ export const getOwnerCars = async (req, res) => {
   }
 };
 
-//avaliablity change
 export const toggleCarAvailability = async (req, res) => {
   try {
     const { _id } = req.user;
@@ -89,6 +86,8 @@ export const toggleCarAvailability = async (req, res) => {
     car.isAvaliable = !car.isAvaliable;
     await car.save();
 
+    await redisClient.del("available_cars");
+
     res.json({ success: true, message: "Availability Toggled" });
   } catch (error) {
     console.log(error.message);
@@ -96,7 +95,6 @@ export const toggleCarAvailability = async (req, res) => {
   }
 };
 
-//delete the car
 export const deleteCar = async (req, res) => {
   try {
     const { _id } = req.user;
@@ -111,6 +109,8 @@ export const deleteCar = async (req, res) => {
     car.isAvaliable = false;
     await car.save();
 
+    await redisClient.del("available_cars");
+
     res.json({ success: true, message: "Availability Toggled" });
   } catch (error) {
     console.log(error.message);
@@ -118,18 +118,17 @@ export const deleteCar = async (req, res) => {
   }
 };
 
-//dashboard data
 export const getDashboardData = async (req, res) => {
   try {
-    const {_id, role} = req.user;
-    if(role !== 'owner'){
+    const { _id, role } = req.user;
+    if (role !== "owner") {
       return res.json({
         success: false,
         message: "Unauthorized",
       });
     }
-    
-    const cars = await Car.find({owner:_id});
+
+    const cars = await Car.find({ owner: _id });
     const bookings = await Booking.find({ owner: _id })
       .populate("car")
       .sort({ createdAt: -1 });
@@ -154,26 +153,24 @@ export const getDashboardData = async (req, res) => {
       pendingBookings: pendingBookings.length,
       completedBookings: completedBookings.length,
       recentBookings: bookings.slice(0, 3),
-      monthlyRevenue, // The correctly calculated revenue for August
+      monthlyRevenue,
     };
 
     res.json({ success: true, dashboardData });
-
   } catch (error) {
     console.log(error.message);
     res.json({
-      success:false,
-      message:error.message
-    })
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-export const updateUserImage = async(req, res) =>{
+export const updateUserImage = async (req, res) => {
   try {
-    const {_id} = req.user;
+    const { _id } = req.user;
     const imageFile = req.file;
 
-    // upload the image
     const fileBuffer = fs.readFileSync(imageFile.path);
     const response = await imageKit.upload({
       file: fileBuffer,
@@ -181,7 +178,6 @@ export const updateUserImage = async(req, res) =>{
       folder: "/users",
     });
 
-    //url generation for the image
     var optimizedImageUrl = imageKit.url({
       path: response.filePath,
       transformation: [
@@ -192,13 +188,12 @@ export const updateUserImage = async(req, res) =>{
     });
 
     const image = optimizedImageUrl;
-    await User.findByIdAndUpdate(_id,{image});
+    await User.findByIdAndUpdate(_id, { image });
 
     res.json({
-      success:true,
-      message:"user profile image updated"
-    })
-
+      success: true,
+      message: "user profile image updated",
+    });
   } catch (error) {
     console.log(error.message);
     res.json({
@@ -206,4 +201,4 @@ export const updateUserImage = async(req, res) =>{
       message: error.message,
     });
   }
-}
+};
