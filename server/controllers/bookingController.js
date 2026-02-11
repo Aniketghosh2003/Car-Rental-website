@@ -78,10 +78,23 @@ export const createBooking = async (req, res) => {
 export const getUserBookings = async (req, res) => {
   try {
     const { _id } = req.user;
-    const bookings = await Booking.find({ user: _id })
+    let bookings = await Booking.find({ user: _id })
       .populate("car")
       .sort({ createdAt: -1 });
-    res.json({ success: true, bookings });
+
+    // Auto-cancel expired bookings
+    const currentDate = new Date();
+    const updatedBookings = await Promise.all(bookings.map(async (booking) => {
+      if ((booking.status === 'pending' || (booking.status === 'confirmed' && booking.paymentStatus !== 'Paid')) && new Date(booking.pickupDate) < currentDate) {
+        if (booking.status !== 'cancelled') {
+          booking.status = 'cancelled';
+          await booking.save();
+        }
+      }
+      return booking;
+    }));
+
+    res.json({ success: true, bookings: updatedBookings });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });
@@ -121,7 +134,7 @@ export const changeBookingStatus = async (req, res) => {
     booking.status = status;
     await booking.save();
 
-    res.json({ success: true , message:"Booking status changed"});
+    res.json({ success: true, message: "Booking status changed" });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });
