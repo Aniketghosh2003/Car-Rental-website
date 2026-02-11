@@ -22,23 +22,88 @@ const MyBookings = () => {
   };
 
   useEffect(() => {
-    user &&fetchBookings();
+    user && fetchBookings();
   }, [user]);
 
+  const handlePayment = async (bookingId) => {
+    const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+
+    if (!res) {
+      toast.error("Razorpay SDK failed to load. Are you online?");
+      return;
+    }
+
+    try {
+      const { data } = await axios.post("/api/payment/create-order", { bookingId });
+
+      if (!data.success) {
+        toast.error(data.message);
+        return;
+      }
+
+      const { amount, id: order_id, currency } = data.order;
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: amount.toString(),
+        currency: currency,
+        name: "Car Rental",
+        description: "Booking Payment",
+        order_id: order_id,
+        handler: async function (response) {
+          const data = {
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature,
+            bookingId: bookingId
+          };
+
+          try {
+            const result = await axios.post("/api/payment/verify-payment", data);
+
+            if (result.data.success) {
+              toast.success("Payment Successful");
+              fetchBookings();
+            } else {
+              toast.error("Payment Verification Failed");
+            }
+          } catch (error) {
+            console.log(error);
+            toast.error("Payment Verification Failed");
+          }
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+        },
+        theme: {
+          color: "#3399cc",
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  };
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
       className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
     >
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.5 }}
         className="mb-8"
       >
-        <motion.h1 
+        <motion.h1
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: "easeOut" }}
@@ -46,7 +111,7 @@ const MyBookings = () => {
         >
           My Bookings
         </motion.h1>
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
@@ -56,7 +121,7 @@ const MyBookings = () => {
         </motion.p>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
@@ -67,15 +132,15 @@ const MyBookings = () => {
             key={booking._id}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.6, 
+            transition={{
+              duration: 0.6,
               delay: 0.3 + (index * 0.1),
-              ease: "easeOut" 
+              ease: "easeOut"
             }}
             whileHover={{ y: -5, scale: 1.01 }}
             className="flex flex-col md:flex-row gap-6 border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-300"
           >
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.5 + (index * 0.1) }}
@@ -96,7 +161,7 @@ const MyBookings = () => {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.7 + (index * 0.1) }}
@@ -108,14 +173,23 @@ const MyBookings = () => {
                     Booking #{index + 1}
                   </p>
                   <span
-                    className={`capitalize inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      booking.status === "pending"
-                        ? "bg-red-400/15 text-red-600"
-                        : "bg-green-400/15 text-green-600"
-                    }`}
+                    className={`capitalize inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${booking.status === "pending"
+                      ? "bg-red-400/15 text-red-600"
+                      : "bg-green-400/15 text-green-600"
+                      }`}
                   >
                     {booking.status}
                   </span>
+                  {booking.paymentStatus && booking.status !== "cancelled" && (
+                    <span
+                      className={`capitalize inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${booking.paymentStatus === "Paid"
+                        ? "bg-green-400/15 text-green-600"
+                        : "bg-yellow-400/15 text-yellow-600"
+                        }`}
+                    >
+                      {booking.paymentStatus}
+                    </span>
+                  )}
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-gray-500">Total Price</p>
@@ -172,12 +246,60 @@ const MyBookings = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Payment Button */}
+              {booking.status === 'confirmed' && booking.paymentStatus !== 'Paid' && new Date() < new Date(booking.pickupDate) && (
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() => handlePayment(booking._id)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-sm shadow-md hover:shadow-lg focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                  >
+                    Pay Now
+                  </button>
+                </div>
+              )}
+              {booking.paymentStatus === 'Paid' && (
+                <div className="mt-4 flex justify-end">
+                  <button
+                    disabled
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg  font-medium text-sm shadow-md cursor-not-allowed opacity-90"
+                  >
+                    Paid Successfully
+                  </button>
+                </div>
+              )}
+              {booking.status === 'confirmed' && booking.paymentStatus !== 'Paid' && new Date() >= new Date(booking.pickupDate) && (
+                <div className="mt-4 flex justify-end">
+                  <button
+                    disabled
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg  font-medium text-sm shadow-md cursor-not-allowed opacity-90"
+                  >
+                    Booking Expired / Cancelled
+                  </button>
+                </div>
+              )}
+
             </motion.div>
           </motion.div>
         ))}
       </motion.div>
     </motion.div>
   );
+};
+
+// Add payment handler
+const loadScript = (src) => {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = () => {
+      resolve(true);
+    };
+    script.onerror = () => {
+      resolve(false);
+    };
+    document.body.appendChild(script);
+  });
 };
 
 export default MyBookings;

@@ -144,7 +144,7 @@ export const getDashboardData = async (req, res) => {
 
     const monthlyRevenue = bookings
       .slice()
-      .filter((booking) => booking.status === "confirmed")
+      .filter((booking) => booking.status === "confirmed" && booking.paymentStatus === "Paid")
       .reduce((acc, booking) => acc + booking.price, 0);
 
     const dashboardData = {

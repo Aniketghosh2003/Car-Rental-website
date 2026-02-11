@@ -21,7 +21,7 @@ const Sidebar = () => {
         fetchUser();
         toast.success("Image updated successfully!");
         setImage("");
-      }else{
+      } else {
         toast.error(data.message || "Failed to update image");
       }
     } catch (error) {
@@ -30,7 +30,16 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="relative min-h-screen md:flex flex-col items-center pt-8 max-w-13 md:max-w-60 w-full border-r border-borderColor text-sm">
+    <div className="relative min-h-screen md:flex flex-col items-center pt-0 max-w-13 md:max-w-60 w-full border-r border-borderColor text-sm">
+      <div className="w-full mb-1 mt-2 px-4">
+        <NavLink
+          to="/"
+          className="flex items-center gap-2 w-full py-1 px-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors  text-xs"
+        >
+          <img src={assets.arrow_icon} alt="" className="w-3 h-3 rotate-180" />
+          <span className="max-md:hidden font-medium">Back</span>
+        </NavLink>
+      </div>
       <div className="group relative">
         <label htmlFor="image">
           <img
@@ -38,7 +47,7 @@ const Sidebar = () => {
               image
                 ? URL.createObjectURL(image)
                 : user?.image ||
-                  "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=300"
+                "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=300"
             }
             alt=""
             className="h-9 md:h-14 w-9 md:w-14 rounded-full mx-auto"
@@ -75,11 +84,10 @@ const Sidebar = () => {
           <NavLink
             key={index}
             to={link.path}
-            className={`relative flex items-center gap-2 w-full py-3 pl-4 first:mt-6 ${
-              link.path === location.pathname
-                ? "bg-primary/10 text-primary"
-                : "text-gray-600"
-            }`}
+            className={`relative flex items-center gap-2 w-full py-3 pl-4 first:mt-6 ${link.path === location.pathname
+              ? "bg-primary/10 text-primary"
+              : "text-gray-600"
+              }`}
           >
             <img
               src={
@@ -89,13 +97,14 @@ const Sidebar = () => {
             />
             <span className="max-md:hidden">{link.name}</span>
             <div
-              className={`${
-                link.path === location.pathname && "bg-primary"
-              } w-1 h-8 rounded-l right-0 absolute`}
+              className={`${link.path === location.pathname && "bg-primary"
+                } w-1 h-8 rounded-l right-0 absolute`}
             ></div>
           </NavLink>
         ))}
       </div>
+
+
     </div>
   );
 };

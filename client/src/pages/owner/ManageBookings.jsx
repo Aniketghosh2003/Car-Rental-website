@@ -82,6 +82,9 @@ const ManageBookings = () => {
                   Total
                 </th>
                 <th scope="col" className="px-6 py-3">
+                  Payment Status
+                </th>
+                <th scope="col" className="px-6 py-3">
                   Actions
                 </th>
               </tr>
@@ -108,6 +111,19 @@ const ManageBookings = () => {
                   <td className="px-6 py-4 whitespace-nowrap font-medium">
                     Rs {booking.price}
                   </td>
+                  <td className="px-6 py-4">
+                    <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        booking.paymentStatus === 'Paid'
+                        ? 'bg-green-100 text-green-800'
+                        : booking.paymentStatus === 'Failed'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}
+                    >
+                    {booking.paymentStatus || 'Pending'}
+                    </span>
+                 </td>
                   <td className='p-3'>
                     {booking.status === 'pending' ? (
                         <select 
