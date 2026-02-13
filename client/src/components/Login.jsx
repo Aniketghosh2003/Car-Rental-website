@@ -1,6 +1,7 @@
 import React from 'react'
 import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
 
@@ -52,6 +53,34 @@ const onSubmitHandler = async (event) => {
     }
   }
 };
+
+const handleGoogleSuccess = async (credentialResponse, axios, navigate, setToken, setShowLogin) => {
+  try {
+    const { credential } = credentialResponse || {};
+    if (!credential) {
+      toast.error("No credential received from Google");
+      return;
+    }
+
+    const { data } = await axios.post('/api/user/google-login', { credential });
+
+    if (data.success) {
+      toast.success(data.message || "Logged in with Google");
+      navigate("/");
+      setToken(data.token);
+      localStorage.setItem("token", data.token);
+      setShowLogin(false);
+    } else {
+      toast.error(data.message || "Google login failed");
+    }
+  } catch (error) {
+    toast.error(
+      error?.response?.data?.message ||
+      error.message ||
+      "Google login failed. Please try again."
+    );
+  }
+};
     return (
         <div
             onClick={() => setShowLogin(false)}
@@ -89,8 +118,21 @@ const onSubmitHandler = async (event) => {
                     </p>
                 )}
                 <button className="bg-primary hover:bg-primary-dull transition-all text-white w-full py-2 rounded-md cursor-pointer">
-                    {state === "register" ? "Create Account" : "Login"}
+                  {state === "register" ? "Create Account" : "Login"}
                 </button>
+
+                <div className="w-full flex flex-col gap-2 mt-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-px bg-gray-200" />
+                    <span className="text-xs text-gray-400">OR</span>
+                    <div className="flex-1 h-px bg-gray-200" />
+                  </div>
+                  <GoogleLogin
+                    onSuccess={(cred) => handleGoogleSuccess(cred, axios, navigate, setToken, setShowLogin)}
+                    onError={() => toast.error("Google sign-in failed")}
+                    width="100%"
+                  />
+                </div>
             </form>
         </div>
     );
