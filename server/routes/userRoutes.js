@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, loginUser, getUserdata, getCars } from '../controllers/userController.js';
+import { registerUser, loginUser, getUserdata, getCars, googleAuth } from '../controllers/userController.js';
 import { protect } from '../middlewares/auth.js';
 
 const userRouter = express.Router();
@@ -9,6 +9,9 @@ userRouter.post('/register', registerUser);
 
 // POST /api/users/login - User login
 userRouter.post('/login', loginUser);
+
+// POST /api/users/google-login - Google login
+userRouter.post('/google-login', googleAuth);
 
 userRouter.get('/data',protect,getUserdata);
 
