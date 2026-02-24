@@ -20,6 +20,7 @@ export const AppProvider = ({ children }) => {
   const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [cars, setCars] = useState([]);
+  const [ratingsByCar, setRatingsByCar] = useState({});
 
   // Fetch user data
   const fetchUser = async () => {
@@ -62,6 +63,32 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Fetch rating summary for cars
+  const fetchRatingsSummary = async () => {
+    try {
+      const { data } = await axios.get("/api/reviews/summary");
+
+      if (data.success && Array.isArray(data.summary)) {
+        const map = {};
+        data.summary.forEach((item) => {
+          if (item._id) {
+            map[item._id] = {
+              avgRating: item.avgRating,
+              reviewCount: item.reviewCount,
+            };
+          }
+        });
+        setRatingsByCar(map);
+        return map;
+      }
+
+      return {};
+    } catch (error) {
+      console.error("Error fetching ratings summary:", error);
+      return {};
+    }
+  };
+
   // Logout
   const logout = () => {
     localStorage.removeItem("token");
@@ -80,6 +107,7 @@ export const AppProvider = ({ children }) => {
     
     // Fetch cars on app load
     fetchCars();
+    fetchRatingsSummary();
   }, []);
 
   // Set auth headers
@@ -107,6 +135,8 @@ export const AppProvider = ({ children }) => {
     fetchCars,
     cars,
     setCars,
+    ratingsByCar,
+    fetchRatingsSummary,
     pickupDate,
     setPickupDate,
     returnDate,

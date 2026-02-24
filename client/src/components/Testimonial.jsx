@@ -1,58 +1,50 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Title from "./Title";
 import { assets } from "../assets/assets";
 import { motion } from "motion/react";
+import { useAppContext } from "../context/AppContext";
 
 const Testimonial = () => {
-    const [tooltip, setTooltip] = useState({ visible: false, text: "", x: 0, y: 0 });
-    const cardRefs = useRef([]);
+  const { axios } = useAppContext();
+  const [tooltip, setTooltip] = useState({ visible: false, text: "", x: 0, y: 0 });
+  const [reviews, setReviews] = useState([]);
+  const cardRefs = useRef([]);
 
-    const handleMouseMove = (e, index) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        setTooltip({
-            visible: true,
-            text: testimonials[index].name,
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-        });
+  const handleMouseMove = (e, index) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const review = reviews[index];
+    setTooltip({
+      visible: !!review,
+      text: review ? review.name : "",
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTooltip({ visible: false, text: "", x: 0, y: 0 });
+  };
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const { data } = await axios.get("/api/reviews");
+        if (data.success && Array.isArray(data.reviews)) {
+          setReviews(data.reviews);
+        }
+      } catch (error) {
+        console.error("Failed to load reviews", error);
+      }
     };
 
-    const handleMouseLeave = () => {
-        setTooltip({ visible: false, text: "", x: 0, y: 0 });
-    };
-
-    const testimonials = [
-      {
-        name: "Priya Sharma",
-        location: "Mumbai, India",
-        image: assets.testimonial_image_1,
-        message: "I've rented cars from various companies, but the experience with CarRental was exceptional. The service was top-notch!",
-        title: "Travel Enthusiast",
-        rating: 5
-      },
-      {
-        name: "Arjun Patel",
-        location: "Delhi, India",
-        image: assets.testimonial_image_2,
-        message: "CarRental made my trip so much easier. The car was delivered right to my door, and the customer service was fantastic!",
-        title: "Business Executive",
-        rating: 5
-      },
-      {
-        name: "Ananya Reddy",
-        location: "Bangalore, India",
-        image: assets.testimonial_image_1,
-        message: "I highly recommend CarRental! Their fleet is amazing, and I always feel like I'm getting the best deal with excellent service.",
-        title: "Software Engineer",
-        rating: 4
-      },
-    ];
+    fetchReviews();
+  }, [axios]);
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 1, delay: 0.5 }}
-      className="py-28 px-6 md:px-16 lg:px-24 xl:px-44"
+      className="py-20 px-6 md:px-16 lg:px-24 xl:px-44"
     >
       <motion.div
         initial={{ opacity: 0, y: 40 }}
@@ -65,88 +57,99 @@ const Testimonial = () => {
         />
       </motion.div>
 
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-18"
-      >
-        {testimonials.map((testimonial, index) => (
-          <motion.div
-            key={index}
-            ref={(el) => (cardRefs.current[index] = el)}
-            onMouseMove={(e) => handleMouseMove(e, index)}
-            onMouseLeave={handleMouseLeave}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.6, 
-              delay: index * 0.1,
-              ease: "easeOut" 
-            }}
-            whileHover={{ y: -8, scale: 1.02 }}
-            className="relative border border-gray-200 rounded-lg overflow-hidden max-w-sm shadow-md hover:shadow-xl transition-all duration-300 ease-in-out cursor-pointer bg-white"
-          >
-            {tooltip.visible && tooltip.text === testimonial.name && (
-              <span
-                className="absolute px-2.5 py-1 text-sm rounded text-nowrap bg-indigo-500 text-white pointer-events-none transition-all duration-300"
-                style={{
-                  top: tooltip.y + 8,
-                  left: tooltip.x + 8,
-                  transition: "all 0.3s ease-out",
-                  animationDelay: "0.2s",
-                }}
-              >
-                {tooltip.text}
-              </span>
-            )}
+      {reviews.length === 0 ? (
+        <p className="mt-10 text-center text-gray-500 text-sm">
+          No reviews yet. Complete a booking and be the first to share your experience.
+        </p>
+      ) : (
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-18"
+        >
+          {reviews.map((item, index) => {
+            const avatar =
+              (item.user && item.user.image) || assets.user_profile;
+            const name = item.name;
+            const rating = item.rating || 5;
+            const message = item.comment || item.message;
+            const title = item.car ? `${item.car.brand} ${item.car.model}` : "Verified Customer";
+            const location = item.car && item.car.location ? item.car.location : "";
 
-            <div className="flex flex-col">
-              {/* Profile Image at Top */}
-              <div className="flex justify-center pt-6 pb-4">
-                <img
-                  className="rounded-full w-16 h-16 object-cover border-4 border-gray-100"
-                  src={testimonial.image}
-                  alt={`${testimonial.name} profile`}
-                />
-              </div>
-              
-              {/* Content Section */}
-              <div className="px-6 pb-6 text-center">
-                {/* Star Rating */}
-                <div className="flex justify-center mb-3">
-                  {[...Array(5)].map((_, i) => (
+            return (
+              <motion.div
+                key={item._id || index}
+                ref={(el) => (cardRefs.current[index] = el)}
+                onMouseMove={(e) => handleMouseMove(e, index)}
+                onMouseLeave={handleMouseLeave}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: index * 0.1,
+                  ease: "easeOut" 
+                }}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className="relative border border-gray-200 rounded-lg overflow-hidden max-w-sm shadow-md hover:shadow-xl transition-all duration-300 ease-in-out cursor-pointer bg-white"
+              >
+                {tooltip.visible && tooltip.text === name && (
+                  <span
+                    className="absolute px-2.5 py-1 text-sm rounded text-nowrap bg-indigo-500 text-white pointer-events-none transition-all duration-300"
+                    style={{
+                      top: tooltip.y + 8,
+                      left: tooltip.x + 8,
+                      transition: "all 0.3s ease-out",
+                      animationDelay: "0.2s",
+                    }}
+                  >
+                    {tooltip.text}
+                  </span>
+                )}
+
+                <div className="flex flex-col">
+                  <div className="flex justify-center pt-6 pb-4">
                     <img
-                      key={i}
-                      src={assets.star_icon}
-                      alt="star"
-                      className={`w-4 h-4 ${
-                        i < testimonial.rating ? 'opacity-100' : 'opacity-30'
-                      }`}
+                      className="rounded-full w-16 h-16 object-cover border-4 border-gray-100"
+                      src={avatar}
+                      alt={`${name} profile`}
                     />
-                  ))}
+                  </div>
+                  
+                  <div className="px-6 pb-6 text-center">
+                    <div className="flex justify-center mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <img
+                          key={i}
+                          src={assets.star_icon}
+                          alt="star"
+                          className={`w-4 h-4 ${
+                            i < rating ? 'opacity-100' : 'opacity-30'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    
+                    <div className="mb-4 text-gray-600">
+                      <p className="text-sm leading-relaxed line-clamp-3 italic">
+                        "{message}"
+                      </p>
+                    </div>
+                    
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                        {name}
+                      </h3>
+                      <p className="text-sm text-gray-500 mb-1">{title}</p>
+                      <p className="text-xs text-gray-400">{location}</p>
+                    </div>
+                  </div>
                 </div>
-                
-                {/* Testimonial Text */}
-                <div className="mb-4 text-gray-600">
-                  <p className="text-sm leading-relaxed line-clamp-3 italic">
-                    "{testimonial.message}"
-                  </p>
-                </div>
-                
-                {/* Customer Info */}
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                    {testimonial.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 mb-1">{testimonial.title}</p>
-                  <p className="text-xs text-gray-400">{testimonial.location}</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      )}
     </motion.div>
   );
 };

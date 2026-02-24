@@ -1,11 +1,14 @@
 import React from 'react'
 import { assets } from '../assets/assets'
 import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../context/AppContext';
 
 const CarCard = ({ car }) => {
 
     const  currency = import.meta.env.VITE_CURRENCY || 'RS';
     const navigate = useNavigate();
+  const { ratingsByCar } = useAppContext();
+  const ratingInfo = ratingsByCar?.[car._id];
   return (
     <div onClick={() => {navigate(`/car-details/${car._id}`); scrollTo(0,0)}} className="group rounded-xl overflow-hidden shadow-lg hover:-translate-y-1 transition-all duration-500 cursor-pointer">
       <div className="relative w-full h-48 overflow-hidden">
@@ -14,6 +17,13 @@ const CarCard = ({ car }) => {
           alt="Car Image"
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
+
+        {ratingInfo && (
+          <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/75 backdrop-blur-sm text-yellow-300 px-2 py-1 rounded-full text-xs">
+            <img src={assets.star_icon} alt="rating" className="w-3 h-3" />
+            <span className="font-semibold">{ratingInfo.avgRating.toFixed(1)}</span>
+          </div>
+        )}
 
         {car.isAvaliable && (
           <p className="absolute top-4 left-4 bg-primary/90 text-white text-xs px-2.5 py-1 rounded-full">

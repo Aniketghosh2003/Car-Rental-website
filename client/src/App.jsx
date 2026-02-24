@@ -5,6 +5,7 @@ import Home from "./pages/Home.jsx"
 import Cars from './pages/Cars.jsx';
 import CarDetails from './pages/CarDetails.jsx';
 import MyBookings from './pages/MyBookings.jsx';
+import Profile from './pages/Profile.jsx';
 import TermsOfService from './pages/TermsOfService.jsx';
 import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
 import HelpCenter from './pages/HelpCenter.jsx';
@@ -33,6 +34,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/car-details/:id" element={<CarDetails />} />
         <Route path="/cars" element={<Cars />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/my-bookings" element={<MyBookings />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { assets, dummyDashboardData } from "../../assets/assets";
 import Title from "../../components/owner/Title";
 import { useAppContext } from "../../context/AppContext";
@@ -7,6 +8,7 @@ import toast from "react-hot-toast";
 const Dashboard = () => {
 
   const {axios, isOwner, currency} = useAppContext();
+  const navigate = useNavigate();
 
 
   const [data, setData] = useState({
@@ -77,10 +79,23 @@ const Dashboard = () => {
   return (
     <div className="p-6 md:p-8 lg:p-10 text-gray-800">
       <div className="mb-8">
-        <Title 
-          title="Admin Dashboard" 
-          subTitle="Monitor overall platform performance including total cars, bookings, revenue, and recent activities"
-        />
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 sm:hidden"
+        >
+          <img
+            src={assets.arrow_icon}
+            alt="Back"
+            className="w-3 h-3 rotate-180"
+          />
+          <span>Back</span>
+        </button>
+        <div className="mt-4">
+          <Title 
+            title="Admin Dashboard" 
+            subTitle="Monitor overall platform performance including total cars, bookings, revenue, and recent activities"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -11,7 +11,9 @@ const Navbar = () => {
 
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const changeRole = async () => {
     try {
@@ -38,17 +40,17 @@ const Navbar = () => {
     >
       {/* Logo */}
       <Link to="/" className="flex-shrink-0 z-10">
-        <motion.img 
+        <motion.img
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
-          src={assets.logo} 
-          alt="logo" 
-          className="h-8" 
+          src={assets.logo}
+          alt="logo"
+          className="h-8"
         />
       </Link>
 
-      {/* Desktop Navigation */}
-      <motion.div 
+      {/* Desktop Navigation - centered */}
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.5 }}
@@ -76,129 +78,221 @@ const Navbar = () => {
       <div className="hidden lg:flex items-center text-sm gap-3 border border-borderColor px-4 py-2 rounded-full max-w-64 mx-4">
         <input
           type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              const term = searchTerm.trim();
+              if (term) {
+                navigate(`/cars?q=${encodeURIComponent(term)}`);
+              } else {
+                navigate("/cars");
+              }
+            }
+          }}
           className="w-full bg-transparent outline-none placeholder-gray-400 text-gray-700"
           placeholder="Search cars..."
         />
         <img
           src={assets.search_icon}
           alt="search"
-          className="w-4 h-4 opacity-60"
+          className="w-4 h-4 opacity-60 cursor-pointer"
+          onClick={() => {
+            const term = searchTerm.trim();
+            if (term) {
+              navigate(`/cars?q=${encodeURIComponent(term)}`);
+            } else {
+              navigate("/cars");
+            }
+          }}
         />
       </div>
 
       {/* Desktop Action Buttons */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
         className="hidden sm:flex items-center gap-4 flex-shrink-0"
       >
-        <motion.button
+        {/* <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => (isOwner ? navigate("/owner") : changeRole())}
           className="hover:text-gray-900 transition-colors duration-200 font-medium"
         >
           {isOwner ? "Dashboard" : "List cars"}
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05, boxShadow: "0 4px 15px rgba(0,0,0,0.2)" }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            user ? logout() : setShowLogin(true);
-          }}
-          className="px-6 py-2.5 bg-primary hover:bg-primary-dull transition-all duration-200 text-white rounded-lg font-medium shadow-sm hover:shadow-md"
-        >
-          {user ? "Logout" : "Login"}
-        </motion.button>
+        </motion.button> */}
+        {user ? (
+          <div className="relative">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setProfileOpen((prev) => !prev)}
+              className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm overflow-hidden"
+            >
+              <img
+                src={user.image || assets.user_profile}
+                alt={user.name}
+                className="w-full h-full object-cover"
+              />
+            </motion.button>
+
+            {profileOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg text-sm z-50"
+              >
+                {isOwner && (
+                  <button
+                    onClick={() => {
+                      setProfileOpen(false);
+                      navigate("/owner");
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-50"
+                  >
+                    Dashboard
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setProfileOpen(false);
+                    navigate("/profile");
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-50"
+                >
+                  Profile
+                </button>
+                <button
+                  onClick={() => {
+                    setProfileOpen(false);
+                    navigate("/my-bookings");
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-50"
+                >
+                  My Bookings
+                </button>
+                <button
+                  onClick={() => {
+                    setProfileOpen(false);
+                    logout();
+                  }}
+                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+                >
+                  Logout
+                </button>
+              </motion.div>
+            )}
+          </div>
+        ) : (
+          <motion.button
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+            }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowLogin(true)}
+            className="px-6 py-2.5 bg-primary hover:bg-primary-dull transition-all duration-200 text-white rounded-lg font-medium shadow-sm hover:shadow-md"
+          >
+            Login
+          </motion.button>
+        )}
       </motion.div>
 
-      {/* Mobile Navigation Menu */}
+      {/* Mobile Profile in Header (no hamburger) */}
+      <div className="sm:hidden flex items-center gap-3 z-50">
+        {user ? (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 bg-white shadow-sm overflow-hidden"
+          >
+            <img
+              src={user.image || assets.user_profile}
+              alt={user.name}
+              className="w-full h-full object-cover"
+            />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowLogin(true)}
+            className="text-sm font-medium text-primary"
+          >
+            Login
+          </button>
+        )}
+      </div>
+
+      {/* Mobile Navigation Menu (slides in on profile click) */}
       <motion.div
         initial={{ x: "100%" }}
         animate={{ x: open ? 0 : "100%" }}
         transition={{ type: "spring", damping: 20, stiffness: 100 }}
-        className={`sm:hidden fixed inset-0 top-16 bg-white z-40 ${
-          location.pathname === "/" ? "bg-light" : "bg-white"
-        }`}
+        className="sm:hidden fixed inset-0 z-50 bg-white"
       >
-        <div className="flex flex-col h-full">
-          {/* Mobile Navigation Links */}
-          <div className="flex flex-col px-6 py-8 space-y-6">
-            {menuLinks.map((link, index) => (
-              <motion.div
-                key={index}
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: open ? 0 : 50, opacity: open ? 1 : 0 }}
-                transition={{ delay: open ? 0.1 * index : 0, duration: 0.3 }}
-              >
-                <Link
-                  to={link.path}
-                  className="text-lg font-medium hover:text-gray-900 transition-colors duration-200 py-2 border-b border-gray-100 last:border-b-0"
-                  onClick={() => setOpen(false)}
-                >
-                  {link.name}
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Mobile Search Bar */}
-          <div className="px-6 mb-8">
-            <div className="flex items-center gap-3 border border-borderColor px-4 py-3 rounded-lg bg-gray-50">
-              <input
-                type="text"
-                className="w-full bg-transparent outline-none placeholder-gray-400 text-gray-700"
-                placeholder="Search cars..."
-              />
+        <div className="flex flex-col h-full px-6 py-8 space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-semibold text-gray-700">Account</p>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close menu"
+              className="p-1 rounded-full hover:bg-gray-100"
+            >
               <img
-                src={assets.search_icon}
-                alt="search"
-                className="w-4 h-4 opacity-60"
+                src={assets.close_icon}
+                alt="close menu"
+                className="w-4 h-4"
               />
-            </div>
+            </button>
           </div>
 
-          {/* Mobile Action Buttons */}
-          <div className="px-6 space-y-4 mt-auto mb-8">
+          {isOwner && (
             <button
               onClick={() => {
-                isOwner ? navigate("/owner") : changeRole();
+                navigate("/owner");
                 setOpen(false);
               }}
-              className="w-full text-left text-lg font-medium hover:text-gray-900 transition-colors duration-200 py-3 border border-gray-200 rounded-lg px-4 bg-gray-50"
+              className="w-full text-left text-base font-medium py-3 border-b border-gray-100"
             >
-              {isOwner ? "Dashboard" : "List cars"}
+              Dashboard
             </button>
-            <button
-              onClick={() => {
-                user ? logout() : setShowLogin(true);
-                setOpen(false);
-              }}
-              className="w-full px-6 py-3 bg-primary hover:bg-primary-dull transition-all duration-200 text-white rounded-lg font-medium shadow-sm"
-            >
-              {user ? "Logout" : "Login"}
-            </button>
-          </div>
+          )}
+
+          <button
+            onClick={() => {
+              navigate("/profile");
+              setOpen(false);
+            }}
+            className="w-full text-left text-base font-medium py-3 border-b border-gray-100"
+          >
+            Profile
+          </button>
+
+          <button
+            onClick={() => {
+              navigate("/my-bookings");
+              setOpen(false);
+            }}
+            className="w-full text-left text-base font-medium py-3 border-b border-gray-100"
+          >
+            My Bookings
+          </button>
+
+          <button
+            onClick={() => {
+              logout();
+              setOpen(false);
+            }}
+            className="w-full text-left text-base font-medium py-3 text-red-600"
+          >
+            Logout
+          </button>
         </div>
       </motion.div>
-
-      {/* Mobile Menu Toggle */}
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="sm:hidden p-2 z-50 relative"
-        aria-label="Toggle menu"
-        onClick={() => setOpen(!open)}
-      >
-        <motion.img
-          animate={{ rotate: open ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
-          src={open ? assets.close_icon : assets.menu_icon}
-          alt="menu"
-          className="w-6 h-6 transition-transform duration-200"
-        />
-      </motion.button>
 
       {/* Mobile Overlay */}
       {open && (

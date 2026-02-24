@@ -3,11 +3,18 @@ import { assets } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
 import { motion } from "motion/react";
+import { useNavigate } from "react-router-dom";
 
 const MyBookings = () => {
   const { axios, user } = useAppContext();
+  const navigate = useNavigate();
 
   const [bookings, setBookings] = useState([]);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const fetchBookings = async () => {
     try {
       const { data } = await axios.get("/api/bookings/user");
@@ -24,6 +31,41 @@ const MyBookings = () => {
   useEffect(() => {
     user && fetchBookings();
   }, [user]);
+
+  const handleOpenFeedback = (booking) => {
+    setSelectedBooking(booking);
+    setRating(5);
+    setComment("");
+    setShowFeedbackModal(true);
+  };
+
+  const handleSubmitFeedback = async (e) => {
+    e.preventDefault();
+    if (!selectedBooking) return;
+
+    try {
+      setSubmitting(true);
+      const { data } = await axios.post("/api/reviews", {
+        carId: selectedBooking.car._id,
+        bookingId: selectedBooking._id,
+        rating,
+        comment,
+      });
+
+      if (data.success) {
+        toast.success("Feedback submitted successfully");
+        setShowFeedbackModal(false);
+        setSelectedBooking(null);
+        await fetchBookings();
+      } else {
+        toast.error(data.message || "Failed to submit feedback");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message || "Failed to submit feedback");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handlePayment = async (bookingId) => {
     const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
@@ -97,6 +139,18 @@ const MyBookings = () => {
       transition={{ duration: 0.6 }}
       className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
     >
+      {/* Mobile-only Back button */}
+      <div className="sm:hidden mb-4">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+        >
+          <span className="text-lg leading-none">&#8592;</span>
+          <span>Back</span>
+        </button>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -158,6 +212,11 @@ const MyBookings = () => {
                 <p className="text-sm text-gray-500">
                   {booking.car.year} • {booking.car.category}
                 </p>
+                {booking.hasReviewed && (
+                  <span className="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                    Feedback submitted
+                  </span>
+                )}
               </div>
             </motion.div>
 
@@ -279,10 +338,91 @@ const MyBookings = () => {
                 </div>
               )}
 
+              {/* Feedback Button: confirmed booking whose return date has passed and not yet reviewed */}
+              {booking.canReview && (
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() => handleOpenFeedback(booking)}
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium text-sm shadow-md hover:shadow-lg focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                  >
+                    Write a feedback
+                  </button>
+                </div>
+              )}
+
             </motion.div>
           </motion.div>
         ))}
       </motion.div>
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Write a feedback</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              {selectedBooking.car.brand} {selectedBooking.car.model} • Rental ended on {" "}
+              {new Date(selectedBooking.returnDate).toLocaleDateString()}
+            </p>
+            <form onSubmit={handleSubmitFeedback} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Rating
+                </label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      className={`w-8 h-8 flex items-center justify-center rounded-full border text-sm font-medium ${
+                        star <= rating
+                          ? "bg-yellow-400 border-yellow-500 text-white"
+                          : "bg-white border-gray-300 text-gray-500"
+                      }`}
+                    >
+                      {star}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Comment
+                </label>
+                <textarea
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-h-[80px]"
+                  placeholder="Share your experience with this car and service"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowFeedbackModal(false);
+                    setSelectedBooking(null);
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                >
+                  {submitting ? "Submitting..." : "Submit"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };

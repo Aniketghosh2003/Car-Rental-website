@@ -13,10 +13,11 @@ const Cars = () => {
   const pickupLocation = searchParams.get("pickupLocation");
   const pickupDate = searchParams.get("pickupDate");
   const returnDate = searchParams.get("returnDate");
+  const searchQuery = searchParams.get("q") || "";
 
   const { cars, axios } = useAppContext();
 
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(searchQuery);
 
   const isSearchData = pickupLocation && pickupDate && returnDate;
   const [filteredCars, setFilteredCars] = useState([]);
@@ -66,6 +67,11 @@ const Cars = () => {
   useEffect(() => {
     cars.length > 0 && !isSearchData && applyFilter();
   }, [input, cars]);
+
+  useEffect(() => {
+    // Keep local search input in sync with URL query when navigating
+    setInput(searchQuery);
+  }, [searchQuery]);
 
   return (
     <motion.div
