@@ -13,11 +13,29 @@ const CarDetails = () => {
 
   const navigate = useNavigate();
   const [car, setCar] = useState(null);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     setCar(cars.find((car) => car._id === id));
   }, [cars, id]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const { data } = await axios.get(`/api/reviews/car/${id}`);
+        if (data.success && Array.isArray(data.reviews)) {
+          setReviews(data.reviews.slice(0, 3));
+        }
+      } catch (error) {
+        console.error("Failed to fetch reviews for car:", error);
+      }
+    };
+
+    if (id) {
+      fetchReviews();
+    }
+  }, [id, axios]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -161,6 +179,47 @@ const CarDetails = () => {
               ))}
             </div>
           </div>
+
+          {reviews.length > 0 && (
+            <>
+              <hr className="my-8 border-t border-gray-200" />
+
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900">Recent Reviews</h2>
+                <div className="mt-4 space-y-4">
+                  {reviews.map((review) => (
+                    <div
+                      key={review._id}
+                      className="border border-gray-200 rounded-lg p-4 bg-white/60"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-sm font-medium text-gray-900">
+                          {review.name || "Guest"}
+                        </p>
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 5 }).map((_, index) => (
+                            <img
+                              key={index}
+                              src={assets.star_icon}
+                              alt="star"
+                              className={`w-3 h-3 ${
+                                index < review.rating
+                                  ? "opacity-100"
+                                  : "opacity-30"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="mt-1 text-sm text-gray-600">
+                        {review.comment}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </motion.div>
 
         <motion.div 

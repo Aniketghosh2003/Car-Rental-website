@@ -1,5 +1,6 @@
 import Booking from "../models/Booking.js";
 import Car from "../models/Car.js";
+import Review from "../models/Review.js";
 
 //check availability of car
 const checkAvailability = async (car, pickupDate, returnDate) => {
@@ -43,15 +44,30 @@ export const createBooking = async (req, res) => {
     const { _id } = req.user;
     const { car, pickupDate, returnDate } = req.body;
 
+    const picked = new Date(pickupDate);
+    const returned = new Date(returnDate);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    // Basic date validations
+    if (isNaN(picked.getTime()) || isNaN(returned.getTime())) {
+      return res.json({ success: false, message: "Invalid dates provided" });
+    }
+
+    if (picked < now) {
+      return res.json({ success: false, message: "Pickup date cannot be in the past" });
+    }
+
+    if (returned <= picked) {
+      return res.json({ success: false, message: "Return date must be after pickup date" });
+    }
+
     const isAvailable = await checkAvailability(car, pickupDate, returnDate);
     if (!isAvailable) {
       return res.json({ success: false, message: "Car is not available" });
     }
 
     const carData = await Car.findById(car);
-
-    const picked = new Date(pickupDate);
-    const returned = new Date(returnDate);
     const noOfDays = Math.ceil((returned - picked) / (1000 * 60 * 60 * 24));
     const price = carData.pricePerDay * noOfDays;
 
@@ -84,17 +100,52 @@ export const getUserBookings = async (req, res) => {
 
     // Auto-cancel expired bookings
     const currentDate = new Date();
-    const updatedBookings = await Promise.all(bookings.map(async (booking) => {
-      if ((booking.status === 'pending' || (booking.status === 'confirmed' && booking.paymentStatus !== 'Paid')) && new Date(booking.pickupDate) < currentDate) {
-        if (booking.status !== 'cancelled') {
-          booking.status = 'cancelled';
-          await booking.save();
+    bookings = await Promise.all(
+      bookings.map(async (booking) => {
+        if (
+          (booking.status === "pending" ||
+            (booking.status === "confirmed" && booking.paymentStatus !== "Paid")) &&
+          new Date(booking.pickupDate) < currentDate
+        ) {
+          if (booking.status !== "cancelled") {
+            booking.status = "cancelled";
+            await booking.save();
+          }
         }
-      }
-      return booking;
-    }));
+        return booking;
+      })
+    );
 
-    res.json({ success: true, bookings: updatedBookings });
+    // Compute canReview / hasReviewed flags per booking:
+    // confirmed, past returnDate, and not already reviewed for that booking
+    const bookingIds = bookings.map((b) => b._id);
+
+    const userReviews = bookingIds.length
+      ? await Review.find({ user: _id, booking: { $in: bookingIds } }).select("booking")
+      : [];
+
+    const reviewedBookingIds = new Set(
+      userReviews
+        .map((r) => r.booking && r.booking.toString())
+        .filter(Boolean)
+    );
+
+    const bookingsWithFlags = bookings.map((booking) => {
+      const plain = booking.toObject();
+      const hasCompleted =
+        booking.status === "confirmed" &&
+        new Date(booking.returnDate) <= currentDate;
+
+      plain.canReview =
+        hasCompleted && !reviewedBookingIds.has(booking._id.toString());
+
+      plain.hasReviewed =
+        hasCompleted && reviewedBookingIds.has(booking._id.toString());
+
+      return plain;
+    });
+
+    res.json({ success: true, bookings: bookingsWithFlags });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });

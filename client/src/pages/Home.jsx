@@ -4,13 +4,15 @@ import FeaturedSection from '../components/FeaturedSection'
 import Banner from '../components/Banner'
 import Testimonial from '../components/Testimonial'
 import Newsletter from '../components/Newsletter'
+import { useAppContext } from '../context/AppContext'
 
 const Home = () => {
+  const { isOwner } = useAppContext();
   return (
     <div>
       <Hero/>
       <FeaturedSection/>
-      <Banner/> 
+      {!isOwner && <Banner/>}
       <Testimonial/>
     </div>
   )

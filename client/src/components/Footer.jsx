@@ -72,9 +72,6 @@ const Footer = () => {
               <Link to="/cars" className="hover:text-gray-700 transition-colors">Browse Cars</Link>
             </li>
             <li>
-              <Link to="/my-bookings" className="hover:text-gray-700 transition-colors">My Bookings</Link>
-            </li>
-            <li>
                 <a 
                   href="https://aniketghosh-portfolio.vercel.app/" 
                   target="_blank" 
