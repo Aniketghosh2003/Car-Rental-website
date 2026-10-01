@@ -10,7 +10,7 @@ A modern, full-stack car rental platform built with the MERN stack, offering sea
 
 ### Application Flowchart
 
-![Car Rental Website Flowchart](./Flowchart.svg)
+![Car Rental Website Flowchart](./flowchart.svg)
 
 ---
 
